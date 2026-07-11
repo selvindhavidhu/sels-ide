@@ -20,7 +20,6 @@ include(cmake/CompilerFlags.cmake)
 
 add_executable(sels-ide
     src/main.cpp
-        src/main.cpp
 )
 
 target_compile_features(sels-ide PRIVATE cxx_std_20)
