@@ -8,6 +8,14 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
+    },
+    {
+      "name": "lint-base",
+      "inherits": "vcpkg",
+      "binaryDir": "${sourceDir}/build-lint",
+      "cacheVariables": {
+        "SELS_IDE_ENABLE_CLANG_TIDY": "ON"
+      }
     }
   ]
 }

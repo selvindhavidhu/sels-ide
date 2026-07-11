@@ -40,13 +40,16 @@ namespace {
 
 ushort execDialog(TDialog *dialog, void *data) {
     TView *view = TProgram::application->validView(dialog);
-    if (!view)
+    if (!view) {
         return cmCancel;
-    if (data)
+    }
+    if (data) {
         view->setData(data);
+    }
     ushort result = TProgram::deskTop->execView(view);
-    if (result != cmCancel && data)
+    if (result != cmCancel && data) {
         view->getData(data);
+    }
     TObject::destroy(view);
     return result;
 }
@@ -54,7 +57,7 @@ ushort execDialog(TDialog *dialog, void *data) {
 // Bridges TEditor's error/save prompts to real dialogs; without this, TEditor
 // silently no-ops on read/write failures and "Save as" never shows a dialog.
 ushort doEditDialog(int dialog, ...) {
-    va_list arg;
+    va_list arg{};
     va_start(arg, dialog);
     ushort result = cmCancel;
     switch (dialog) {
@@ -92,18 +95,21 @@ ushort doEditDialog(int dialog, ...) {
 TEditWindow *TEditorApp::openEditor(const char *fileName, Boolean visible) {
     TRect r = deskTop->getExtent();
     TView *view = validView(new TEditWindow(r, fileName, wnNoNumber));
-    if (!view)
+    if (!view) {
         return nullptr;
-    if (!visible)
+    }
+    if (!visible) {
         view->hide();
+    }
     deskTop->insert(view);
     return static_cast<TEditWindow *>(view);
 }
 
 void TEditorApp::fileOpen() {
     char fileName[MAXPATH] = "*.*";
-    if (execDialog(new TFileDialog("*.*", "Open file", "~N~ame", fdOpenButton, 100), fileName) != cmCancel)
+    if (execDialog(new TFileDialog("*.*", "Open file", "~N~ame", fdOpenButton, 100), fileName) != cmCancel) {
         openEditor(fileName, True);
+    }
 }
 
 void TEditorApp::fileNew() {
@@ -112,8 +118,9 @@ void TEditorApp::fileNew() {
 
 void TEditorApp::handleEvent(TEvent &event) {
     TApplication::handleEvent(event);
-    if (event.what != evCommand)
+    if (event.what != evCommand) {
         return;
+    }
 
     switch (event.message.command) {
     case cmOpen:
@@ -152,7 +159,7 @@ TStatusLine *TEditorApp::initStatusLine(TRect r) {
 }
 
 TEditorApp::TEditorApp()
-    : TProgInit(TEditorApp::initStatusLine, TEditorApp::initMenuBar, TEditorApp::initDeskTop), TApplication() {
+    : TProgInit(TEditorApp::initStatusLine, TEditorApp::initMenuBar, TEditorApp::initDeskTop) {
     TCommandSet ts;
     ts.enableCmd(cmSave);
     ts.enableCmd(cmSaveAs);
