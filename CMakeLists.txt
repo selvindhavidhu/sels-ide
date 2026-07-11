@@ -23,6 +23,7 @@ include(cmake/ClangTidy.cmake)
 
 add_executable(sels-ide
     src/main.cpp
+    src/teditorapp.cpp
 )
 
 target_compile_features(sels-ide PRIVATE cxx_std_20)
