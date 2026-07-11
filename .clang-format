@@ -1,0 +1,5 @@
+BasedOnStyle: Microsoft
+SpaceBeforeCpp11BracedList: true
+SpaceAfterCStyleCast: true
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Attach
