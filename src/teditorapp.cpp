@@ -121,11 +121,11 @@ void TEditorApp::outOfMemory() {
 
 TMenuBar *TEditorApp::initMenuBar(TRect r) {
     r.b.y = r.a.y + 1;
-    TSubMenu &file = *new TSubMenu("~F~ile", kbAltF) + *new TMenuItem("~O~pen", cmOpen, kbF3, hcNoContext, "F3") +
-                     *new TMenuItem("~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N") +
+    TSubMenu &file = *new TSubMenu("~F~ile", kbAltF) + *new TMenuItem("~N~ew", cmNew, kbNoKey) +
+                     *new TMenuItem("~O~pen", cmOpen, kbF3, hcNoContext, "F3") +
                      *new TMenuItem("~S~ave", cmSave, kbF2, hcNoContext, "F2") +
                      *new TMenuItem("S~a~ve as...", cmSaveAs, kbNoKey) + newLine() +
-                     *new TMenuItem("E~x~it", cmQuit, kbCtrlQ, hcNoContext, "Ctrl-Q");
+                     *new TMenuItem("~Q~uit", cmQuit, kbAltX, hcNoContext, "Alt-X");
 
     return new TMenuBar(r, file);
 }
