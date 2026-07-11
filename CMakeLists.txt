@@ -14,6 +14,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 find_package(fmt CONFIG REQUIRED)
+find_package(tvision CONFIG REQUIRED)
 
 include(cmake/CompilerFlags.cmake)
 
@@ -26,4 +27,4 @@ target_compile_features(sels-ide PRIVATE cxx_std_20)
 
 target_compile_options(sels-ide PRIVATE ${SELS_IDE_COMPILE_OPTIONS})
 
-target_link_libraries(sels-ide PRIVATE fmt::fmt)
+target_link_libraries(sels-ide PRIVATE fmt::fmt tvision::tvision)
