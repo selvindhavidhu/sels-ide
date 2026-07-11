@@ -15,11 +15,15 @@ endif()
 
 find_package(fmt CONFIG REQUIRED)
 
+include(cmake/CompilerFlags.cmake)
+
 add_executable(sels-ide
     src/main.cpp
         src/main.cpp
 )
 
 target_compile_features(sels-ide PRIVATE cxx_std_20)
+
+target_compile_options(sels-ide PRIVATE ${SELS_IDE_COMPILE_OPTIONS})
 
 target_link_libraries(sels-ide PRIVATE fmt::fmt)
