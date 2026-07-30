@@ -72,9 +72,9 @@ ushort doEditDialog(int dialog, ...) {
 
 } // namespace
 
-TEditWindow *TEditorApp::openEditor(const char *fileName, Boolean visible) {
+THighlightEditWindow *TEditorApp::openEditor(const char *fileName, Boolean visible) {
     TRect r = deskTop->getExtent();
-    TView *view = validView(new TEditWindow(r, fileName, wnNoNumber));
+    TView *view = validView(new THighlightEditWindow(r, fileName, wnNoNumber));
     if (!view) {
         return nullptr;
     }
@@ -82,7 +82,7 @@ TEditWindow *TEditorApp::openEditor(const char *fileName, Boolean visible) {
         view->hide();
     }
     deskTop->insert(view);
-    return static_cast<TEditWindow *>(view);
+    return static_cast<THighlightEditWindow *>(view);
 }
 
 void TEditorApp::fileOpen() {

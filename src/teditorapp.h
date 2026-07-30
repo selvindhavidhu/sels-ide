@@ -1,13 +1,14 @@
 #pragma once
 
 #define Uses_TApplication
-#define Uses_TEditWindow
 #define Uses_TMenuBar
 #define Uses_TPoint
 #define Uses_TRect
 #define Uses_TStatusLine
 
 #include <tvision/tv.h>
+
+#include "highlighteditor.h"
 
 class TEditorApp : public TApplication {
   public:
@@ -20,7 +21,7 @@ class TEditorApp : public TApplication {
     static TStatusLine *initStatusLine(TRect r);
 
   private:
-    TEditWindow *openEditor(const char *fileName, Boolean visible);
+    THighlightEditWindow *openEditor(const char *fileName, Boolean visible);
     void fileOpen();
     void fileNew();
 };
