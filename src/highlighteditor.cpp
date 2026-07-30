@@ -9,45 +9,121 @@ namespace {
 
 // Classic Turbo C++ 3.0 "Syntax highlighting" colours, sampled from
 // reference screenshots: blue background; white keywords; green
-// identifiers/numbers; red strings; gold symbols/operators; cyan comments.
-// Preprocessor directives get the whole line inverted (blue text on a cyan
-// background) rather than a foreground colour.
+// identifiers; red strings; gold symbols/operators; cyan comments; numeric
+// literals are light gray (decimal), black (hexadecimal), or dark gray
+// (octal). Preprocessor directives get the whole line inverted (blue text
+// on a cyan background) rather than a foreground colour.
 // Byte layout is the legacy BIOS attribute: high nibble = background,
 // low nibble = foreground.
-constexpr TColorAttr kDefaultColor = TColorAttr(0x1F);    // white on blue
-constexpr TColorAttr kCommentColor = TColorAttr(0x13);    // cyan on blue
-constexpr TColorAttr kKeywordColor = TColorAttr(0x1F);    // white on blue
-constexpr TColorAttr kIdentifierColor = TColorAttr(0x1A); // light green on blue
-constexpr TColorAttr kStringColor = TColorAttr(0x14);     // red on blue
-constexpr TColorAttr kNumberColor = TColorAttr(0x1A);     // light green on blue
-constexpr TColorAttr kDirectiveColor = TColorAttr(0x31);  // blue on cyan
-constexpr TColorAttr kSymbolColor = TColorAttr(0x1E);     // yellow/gold on blue
-constexpr TColorAttr kSelectionColor = TColorAttr(0x70);  // black on light gray
+constexpr TColorAttr kDefaultColor = TColorAttr(0x1F);       // white on blue
+constexpr TColorAttr kCommentColor = TColorAttr(0x13);       // cyan on blue
+constexpr TColorAttr kKeywordColor = TColorAttr(0x1F);       // white on blue
+constexpr TColorAttr kIdentifierColor = TColorAttr(0x1A);    // light green on blue
+constexpr TColorAttr kStringColor = TColorAttr(0x14);        // red on blue
+constexpr TColorAttr kNumberDecimalColor = TColorAttr(0x17); // light gray on blue (#B4B4B4)
+constexpr TColorAttr kNumberHexColor = TColorAttr(0x10);     // black on blue (#000000)
+constexpr TColorAttr kNumberOctalColor = TColorAttr(0x18);   // dark gray on blue (#515151)
+constexpr TColorAttr kDirectiveColor = TColorAttr(0x31);     // blue on cyan
+constexpr TColorAttr kSymbolColor = TColorAttr(0x1E);        // yellow/gold on blue
+constexpr TColorAttr kSelectionColor = TColorAttr(0x70);     // black on light gray
 
 const std::unordered_set<std::string> &keywords() {
     static const std::unordered_set<std::string> words = {
         // C keywords
-        "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern",
-        "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static",
-        "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while", "inline", "restrict",
+        "auto",
+        "break",
+        "case",
+        "char",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "double",
+        "else",
+        "enum",
+        "extern",
+        "float",
+        "for",
+        "goto",
+        "if",
+        "int",
+        "long",
+        "register",
+        "return",
+        "short",
+        "signed",
+        "sizeof",
+        "static",
+        "struct",
+        "switch",
+        "typedef",
+        "union",
+        "unsigned",
+        "void",
+        "volatile",
+        "while",
+        "inline",
+        "restrict",
         // C++ keywords
-        "class", "public", "private", "protected", "virtual", "friend", "template", "typename", "namespace", "using",
-        "new", "delete", "this", "operator", "try", "catch", "throw", "bool", "true", "false", "nullptr", "override",
-        "final", "constexpr", "explicit", "mutable", "export", "wchar_t", "static_cast", "dynamic_cast", "const_cast",
-        "reinterpret_cast", "decltype", "noexcept", "static_assert", "thread_local", "alignas", "alignof",
-        "and", "or", "not", "asm",
+        "class",
+        "public",
+        "private",
+        "protected",
+        "virtual",
+        "friend",
+        "template",
+        "typename",
+        "namespace",
+        "using",
+        "new",
+        "delete",
+        "this",
+        "operator",
+        "try",
+        "catch",
+        "throw",
+        "bool",
+        "true",
+        "false",
+        "nullptr",
+        "override",
+        "final",
+        "constexpr",
+        "explicit",
+        "mutable",
+        "export",
+        "wchar_t",
+        "static_cast",
+        "dynamic_cast",
+        "const_cast",
+        "reinterpret_cast",
+        "decltype",
+        "noexcept",
+        "static_assert",
+        "thread_local",
+        "alignas",
+        "alignof",
+        "and",
+        "or",
+        "not",
+        "asm",
     };
     return words;
 }
 
-bool isIdentStart(char c) { return std::isalpha(static_cast<unsigned char>(c)) || c == '_'; }
-bool isIdentChar(char c) { return std::isalnum(static_cast<unsigned char>(c)) || c == '_'; }
+bool isIdentStart(char c) {
+    return std::isalpha(static_cast<unsigned char>(c)) || c == '_';
+}
+bool isIdentChar(char c) {
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+}
 
 } // namespace
 
 THighlightEditor::THighlightEditor(const TRect &bounds, TScrollBar *hScrollBar, TScrollBar *vScrollBar,
-                                    TIndicator *indicator, TStringView fileName) noexcept
-    : TFileEditor(bounds, hScrollBar, vScrollBar, indicator, fileName) {}
+                                   TIndicator *indicator, TStringView fileName) noexcept
+    : TFileEditor(bounds, hScrollBar, vScrollBar, indicator, fileName) {
+}
 
 void THighlightEditor::draw() {
     if (drawLine != delta.y) {
@@ -90,15 +166,14 @@ void THighlightEditor::drawLines(int y, int count, uint linePtr) {
     while (count-- > 0) {
         uint end = lineEnd(linePtr);
         state = scanLine(linePtr, end, state, &cells, width);
-        writeBuf(0, static_cast<short>(y), static_cast<short>(size.x), short(1),
-                 &row[static_cast<size_t>(delta.x)]);
+        writeBuf(0, static_cast<short>(y), static_cast<short>(size.x), short(1), &row[static_cast<size_t>(delta.x)]);
         linePtr = nextLine(linePtr);
         y++;
     }
 }
 
 THighlightEditor::LexState THighlightEditor::scanLine(uint lineStartPtr, uint lineEndPtr, LexState in,
-                                                       TSpan<TScreenCell> *cells, int width) {
+                                                      TSpan<TScreenCell> *cells, int width) {
     Mode mode = in.inBlockComment ? Mode::BlockComment : Mode::Normal;
     bool atLineStart = true;
     uint p = lineStartPtr;
@@ -114,8 +189,12 @@ THighlightEditor::LexState THighlightEditor::scanLine(uint lineStartPtr, uint li
             return kIdentifierColor;
         case Kind::String:
             return kStringColor;
-        case Kind::Number:
-            return kNumberColor;
+        case Kind::NumberDecimal:
+            return kNumberDecimalColor;
+        case Kind::NumberHex:
+            return kNumberHexColor;
+        case Kind::NumberOctal:
+            return kNumberOctalColor;
         case Kind::Directive:
             return kDirectiveColor;
         case Kind::Symbol:
@@ -245,8 +324,24 @@ THighlightEditor::LexState THighlightEditor::scanLine(uint lineStartPtr, uint li
                 }
                 break;
             }
+            Kind kind = Kind::NumberDecimal;
+            if (q - p > 1 && bufChar(p) == '0' && (bufChar(p + 1) == 'x' || bufChar(p + 1) == 'X')) {
+                kind = Kind::NumberHex;
+            } else if (q - p > 1 && bufChar(p) == '0') {
+                bool isFloat = false;
+                for (uint k = p + 1; k < q; ++k) {
+                    char d = bufChar(k);
+                    if (d == '.' || d == 'e' || d == 'E') {
+                        isFloat = true;
+                        break;
+                    }
+                }
+                if (!isFloat) {
+                    kind = Kind::NumberOctal;
+                }
+            }
             while (p < q) {
-                put(p, Kind::Number);
+                put(p, kind);
                 ++p;
             }
             atLineStart = false;
@@ -267,7 +362,7 @@ THighlightEditor::LexState THighlightEditor::scanLine(uint lineStartPtr, uint li
         }
     }
 
-    return LexState{mode == Mode::BlockComment};
+    return LexState {mode == Mode::BlockComment};
 }
 
 THighlightEditWindow::THighlightEditWindow(const TRect &bounds, TStringView fileName, int aNumber) noexcept
@@ -301,7 +396,7 @@ void THighlightEditWindow::close() {
 }
 
 const char *THighlightEditWindow::getTitle(short maxSize) {
-    (void)maxSize;
+    (void) maxSize;
     if (editor->isClipboard() == True) {
         return "Clipboard";
     }
@@ -323,5 +418,5 @@ void THighlightEditWindow::handleEvent(TEvent &event) {
 
 void THighlightEditWindow::sizeLimits(TPoint &min, TPoint &max) {
     TWindow::sizeLimits(min, max);
-    min = TPoint{24, 6};
+    min = TPoint {24, 6};
 }

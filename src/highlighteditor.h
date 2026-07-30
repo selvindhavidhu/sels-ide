@@ -11,9 +11,10 @@
 #include <tvision/tv.h>
 
 // TFileEditor that adds basic C/C++ syntax colouring, using the classic
-// Turbo C++ 3.0 colour scheme: white keywords, green identifiers/numbers,
-// red strings, gold symbols/operators, cyan comments, all on a blue
-// background; preprocessor directives get an inverted blue-on-cyan line.
+// Turbo C++ 3.0 colour scheme: white keywords, green identifiers, red
+// strings, gold symbols/operators, cyan comments, all on a blue background;
+// numeric literals are light gray (decimal), black (hexadecimal), or dark
+// gray (octal); preprocessor directives get an inverted blue-on-cyan line.
 //
 // PROTOTYPE LIMITATIONS (acceptable for a feasibility spike, not for
 // production use):
@@ -28,14 +29,28 @@
 class THighlightEditor : public TFileEditor {
   public:
     THighlightEditor(const TRect &bounds, TScrollBar *hScrollBar, TScrollBar *vScrollBar, TIndicator *indicator,
-                      TStringView fileName) noexcept;
+                     TStringView fileName) noexcept;
 
     void draw() override;
     void handleEvent(TEvent &event) override;
 
   private:
-    enum class Mode : uint8_t { Normal, BlockComment };
-    enum class Kind : uint8_t { Default, Comment, Keyword, Identifier, String, Number, Directive, Symbol };
+    enum class Mode : uint8_t {
+        Normal,
+        BlockComment
+    };
+    enum class Kind : uint8_t {
+        Default,
+        Comment,
+        Keyword,
+        Identifier,
+        String,
+        NumberDecimal,
+        NumberHex,
+        NumberOctal,
+        Directive,
+        Symbol
+    };
 
     struct LexState {
         bool inBlockComment = false;
