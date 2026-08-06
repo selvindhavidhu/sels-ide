@@ -8,11 +8,15 @@
 #define Uses_TStatusDef
 #define Uses_TStatusItem
 #define Uses_TKeys
+#define Uses_MsgBox
+#define Uses_TFindDialogRec
 #include "ide_app.h"
 #include <tvision/msgbox.h>
 #include <tvision/tv.h>
 
 // Custom Command Constants (Must be > 100 to avoid conflicting with predefined commands)
+// Note: cmSaveAll and cmChangeDir are not declared here as tvision already
+// provides them (views.h and stddlg.h respectively).
 const int cmCompile = 101;
 const int cmMake = 102;
 const int cmRun = 103;
@@ -31,8 +35,11 @@ const int cmHelpContents = 115;
 const int cmHelpIndex = 116;
 const int cmHelpAbout = 117;
 const int cmDOSShell = 118;
-const int cmSaveAll = 119;
-const int cmChangeDir = 120;
+const int cmGoToLine = 119;
+const int cmProgramReset = 120;
+const int cmGoToCursor = 121;
+const int cmTraceInto = 122;
+const int cmStepOver = 123;
 
 SelsIdeApp::SelsIdeApp()
     : TProgInit(&SelsIdeApp::initStatusLine, &SelsIdeApp::initMenuBar, &TApplication::initDeskTop) {
@@ -46,11 +53,11 @@ TMenuBar *SelsIdeApp::initMenuBar(TRect r) {
                *new TMenuItem("~O~pen...", cmOpen, kbF3, hcNoContext, "F3") +
                *new TMenuItem("~S~ave", cmSave, kbF2, hcNoContext, "F2") +
                *new TMenuItem("Save ~a~s...", cmSaveAs, kbNoKey) + *new TMenuItem("Save al~l~", cmSaveAll, kbNoKey) +
-               *new TMenuItem("-", 0) + *new TMenuItem("~C~hange dir...", cmChangeDir, kbNoKey) +
+               newLine() + *new TMenuItem("~C~hange dir...", cmChangeDir, kbNoKey) +
                *new TMenuItem("~D~OS shell", cmDOSShell, kbNoKey) +
                *new TMenuItem("E~x~it", cmQuit, kbAltX, hcNoContext, "Alt+X") + *new TSubMenu("~E~dit", kbAltE) +
                *new TMenuItem("~U~ndo", cmUndo, kbNoKey, hcNoContext, "Alt+BkSp") +
-               *new TMenuItem("~R~edo", cmRedo, kbNoKey) + *new TMenuItem("-", 0) +
+               *new TMenuItem("~R~edo", cmRedo, kbNoKey) + newLine() +
                *new TMenuItem("Cu~t~", cmCut, kbNoKey, hcNoContext, "Shift+Del") +
                *new TMenuItem("~C~opy", cmCopy, kbNoKey, hcNoContext, "Ctrl+Ins") +
                *new TMenuItem("~P~aste", cmPaste, kbNoKey, hcNoContext, "Shift+Ins") +

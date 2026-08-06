@@ -25,9 +25,12 @@ add_executable(selside
     src/main.cpp
     src/teditorapp.cpp
     src/highlighteditor.cpp
+    src/ide_app.cpp
 )
 
 target_compile_features(selside PRIVATE cxx_std_20)
+
+target_include_directories(selside PRIVATE include)
 
 target_compile_options(selside PRIVATE ${SELS_IDE_COMPILE_OPTIONS})
 
