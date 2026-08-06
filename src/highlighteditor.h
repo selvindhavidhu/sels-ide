@@ -16,6 +16,11 @@
 // numeric literals are light gray (decimal), black (hexadecimal), or dark
 // gray (octal); preprocessor directives get an inverted blue-on-cyan line.
 //
+// Highlighting only applies to C/C++ source/header files (by extension) and
+// to not-yet-saved "Untitled" buffers; any other file is shown as plain
+// white-on-blue text. This is re-evaluated on every redraw against the
+// live fileName, so it tracks Save As without any extra bookkeeping.
+//
 // PROTOTYPE LIMITATIONS (acceptable for a feasibility spike, not for
 // production use):
 //  - Assumes single-byte (ASCII/Latin) encoding; wide/multi-byte source
@@ -58,7 +63,9 @@ class THighlightEditor : public TFileEditor {
 
     void drawLines(int y, int count, uint linePtr);
     LexState leadingState(uint uptoPtr);
-    LexState scanLine(uint lineStartPtr, uint lineEndPtr, LexState in, TSpan<TScreenCell> *cells, int width);
+    LexState scanLine(uint lineStartPtr, uint lineEndPtr, LexState in, TSpan<TScreenCell> *cells, int width,
+                      bool highlightEnabled);
+    bool highlightingEnabled() const;
 };
 
 // Same role as tvision's TEditWindow, but hosts a THighlightEditor instead
