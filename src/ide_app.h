@@ -7,6 +7,8 @@
 #define Uses_TRect
 #include <tvision/tv.h>
 
+#include "common.h"
+
 class SelsIdeApp : public TApplication {
   public:
     SelsIdeApp();
