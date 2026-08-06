@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <vector>
 
@@ -118,6 +119,32 @@ bool isIdentChar(char c) {
     return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
 }
 
+// File extensions treated as C/C++ source or header files for the purposes
+// of enabling syntax highlighting.
+const std::unordered_set<std::string> &cppExtensions() {
+    static const std::unordered_set<std::string> extensions = {
+        ".c", ".h", ".cpp", ".cc", ".cxx", ".c++", ".hpp", ".hh", ".hxx", ".h++", ".inl", ".ipp", ".tpp", ".tcc",
+    };
+    return extensions;
+}
+
+// True if fileName has an extension (after the last path separator) that
+// matches cppExtensions(), matched case-insensitively.
+bool hasCppExtension(const char *fileName) {
+    std::string_view name(fileName);
+    size_t start = name.find_last_of("/\\");
+    start = (start == std::string_view::npos) ? 0 : start + 1;
+    size_t dot = name.find_last_of('.');
+    if (dot == std::string_view::npos || dot < start) {
+        return false;
+    }
+    std::string ext(name.substr(dot));
+    for (char &c : ext) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    return cppExtensions().contains(ext);
+}
+
 } // namespace
 
 THighlightEditor::THighlightEditor(const TRect &bounds, TScrollBar *hScrollBar, TScrollBar *vScrollBar,
@@ -147,7 +174,7 @@ THighlightEditor::LexState THighlightEditor::leadingState(uint uptoPtr) {
     uint p = 0;
     while (p < uptoPtr && p < bufLen) {
         uint end = lineEnd(p);
-        state = scanLine(p, end, state, nullptr, 0);
+        state = scanLine(p, end, state, nullptr, 0, false);
         uint next = nextLine(p);
         if (next <= p) {
             break;
@@ -157,15 +184,21 @@ THighlightEditor::LexState THighlightEditor::leadingState(uint uptoPtr) {
     return state;
 }
 
+bool THighlightEditor::highlightingEnabled() const {
+    // Untitled (not-yet-saved) buffers are assumed to be C/C++.
+    return fileName[0] == '\0' || hasCppExtension(fileName);
+}
+
 void THighlightEditor::drawLines(int y, int count, uint linePtr) {
     int width = delta.x + size.x;
     std::vector<TScreenCell> row(static_cast<size_t>(width > 0 ? width : 1));
     TSpan<TScreenCell> cells(row.data(), row.size());
 
+    bool highlight = highlightingEnabled();
     LexState state = leadingState(linePtr);
     while (count-- > 0) {
         uint end = lineEnd(linePtr);
-        state = scanLine(linePtr, end, state, &cells, width);
+        state = scanLine(linePtr, end, state, &cells, width, highlight);
         writeBuf(0, static_cast<short>(y), static_cast<short>(size.x), short(1), &row[static_cast<size_t>(delta.x)]);
         linePtr = nextLine(linePtr);
         y++;
@@ -173,13 +206,16 @@ void THighlightEditor::drawLines(int y, int count, uint linePtr) {
 }
 
 THighlightEditor::LexState THighlightEditor::scanLine(uint lineStartPtr, uint lineEndPtr, LexState in,
-                                                      TSpan<TScreenCell> *cells, int width) {
+                                                      TSpan<TScreenCell> *cells, int width, bool highlightEnabled) {
     Mode mode = in.inBlockComment ? Mode::BlockComment : Mode::Normal;
     bool atLineStart = true;
     uint p = lineStartPtr;
     int x = 0;
 
-    auto colorFor = [](Kind kind) {
+    auto colorFor = [highlightEnabled](Kind kind) {
+        if (!highlightEnabled) {
+            return kDefaultColor;
+        }
         switch (kind) {
         case Kind::Comment:
             return kCommentColor;
